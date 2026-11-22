@@ -3,9 +3,9 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFrame, QComboBox,
-    QDateEdit, QMessageBox
+    QDateEdit, QMessageBox, QCalendarWidget
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import (Qt, QDate, QLocale)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -56,6 +56,35 @@ class MainWindow(QMainWindow):
         self.date1_selector = QDateEdit()
         self.date1_selector.setCalendarPopup(True)
         self.date1_selector.setDisplayFormat("dd.MM.yyyy")
+        self.date1_selector.setDate(QDate(2025, 7, 25))
+        self.date1_selector.setMinimumDate(QDate(2017, 1, 1))
+        
+        calendar1 = self.date1_selector.calendarWidget()
+        calendar1.setLocale(QLocale("pl_PL"))
+        calendar1.setNavigationBarVisible(True)
+        calendar1.setGridVisible(True)
+        calendar1.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
+        
+        calendar1.setStyleSheet("""
+            QCalendarWidget QToolButton {
+                color: #0B3D4A;
+                background-color: #F2F7F7;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 35px;
+                min-height: 28px;
+            }
+
+            QCalendarWidget QSpinBox {
+                color: #0B3D4A;
+                background-color: white;
+                font-size: 14px;
+            }
+        """)
+        
+        
+        
+        
         sidebar_layout.addWidget(self.date1_selector)
         
         date2_label = QLabel("Data końcowa")
@@ -64,6 +93,38 @@ class MainWindow(QMainWindow):
         self.date2_selector = QDateEdit()
         self.date2_selector.setCalendarPopup(True)
         self.date2_selector.setDisplayFormat("dd.MM.yyyy")
+        self.date2_selector.setDate(QDate(2025, 9, 10))
+        self.date2_selector.setMinimumDate(QDate(2017,1,1))
+        
+        calendar2 = self.date2_selector.calendarWidget()
+        calendar2.setLocale(QLocale("pl_PL"))
+        calendar2.setNavigationBarVisible(True)
+        calendar2.setGridVisible(True)
+        calendar2.setFirstDayOfWeek(Qt.DayOfWeek.Monday)
+                
+        calendar2.setStyleSheet("""
+            QCalendarWidget QToolButton {
+                color: #0B3D4A;
+                background-color: #F2F7F7;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 35px;
+                min-height: 28px;
+            }
+
+            QCalendarWidget QSpinBox {
+                color: #0B3D4A;
+                background-color: white;
+                font-size: 14px;
+            }
+        """)
+        
+                
+                
+                
+                
+                
+                
         sidebar_layout.addWidget(self.date2_selector)
         
         analyze_button = QPushButton("Analizuj")
@@ -129,8 +190,32 @@ class MainWindow(QMainWindow):
     def start_analysis(self):
         glacier = self.glacier_selector.currentText()
 
-        date1 = self.date1_selector.date().toString("dd.MM.yyyy")
-        date2 = self.date2_selector.date().toString("dd.MM.yyyy")
+        date1 = self.date1_selector.date()
+        date2 = self.date2_selector.date()
+
+        if not self.is_valid_date(date1):
+            QMessageBox.warning(
+                self,
+                "Nieprawidłowa data",
+                "Data początkowa powinna mieścić się w przedziale 25.07-10.09"
+            )
+            return
+
+        if not self.is_valid_date(date2):
+            QMessageBox.warning(
+                self,
+                "Nieprawidłowa data",
+                "Data końcowa powinna mieścić się w przedziale 25.07-10.09"
+            )
+            return
+        
+        if date2 <= date1:
+            QMessageBox.warning(
+                self,
+                "Nieprawidłowa data",
+                "Data końcowa musi być późniejsza, niż data początkowa"
+            )
+
 
         QMessageBox.information(
             self,
@@ -141,3 +226,20 @@ class MainWindow(QMainWindow):
         )
         
         
+        
+    def is_valid_date(self, date):
+        month = date.month()
+        day = date.day()
+        
+        if date.year() <2017:
+            return False
+        
+        if month == 7 and day >=25:
+            return True
+        if month == 8:
+            return True
+        
+        if month == 9 and day <=10:
+            return True
+        
+        return False
